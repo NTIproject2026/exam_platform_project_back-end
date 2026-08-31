@@ -1,0 +1,24 @@
+{
+  "name": "express",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "src/app.ts",
+  "scripts": {
+    "start:dev": "tsx src/app.ts"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.9.4",
+    "nodemailer": "^9.1.0",
+    "redis": "^6.2.1",
+    "tsx": "^4.23.13"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/mongoose": "^5.11.96"
+  }
+}
