@@ -1,0 +1,493 @@
+{
+  "info": {
+    "name": "E-Learning API (Documented)",
+    "description": "Backend API for an e-learning platform covering authentication, diploma (course) management, quizzes, and quiz-taking flows.\n\nBase URL: http://localhost:3000\n\nAuthentication: Most endpoints require a Bearer token obtained from POST /auth/login, sent as `Authorization: Bearer <token>`. The Login request auto-saves the token to the `token` collection variable via a test script.\n\nTypical flow:\n1. POST /auth/register\n2. POST /auth/login (saves {{token}})\n3. POST /dashboard/ (create diploma)\n4. POST /dashboard/:diplomaId/quizzes/ (create quiz)\n5. POST /quizzes/:quizId/questions/ (add questions)\n6. POST /quizzes/:quizId/startQuiz\n7. POST /quizzes/:quizId/submitQuiz?quizAttempt=...",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{token}}", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "diplomaId", "value": "", "type": "string" },
+    { "key": "quizId", "value": "", "type": "string" },
+    { "key": "questionId", "value": "", "type": "string" },
+    { "key": "quizAttempt", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth Controller",
+      "description": "Registration, login, and password recovery endpoints. No auth required.",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"aa@aa3.com\",\n  \"firstName\": \"Youssef\",\n  \"lastName\": \"Youssef\",\n  \"password\": \"123123123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Registers a new user account.\n\nBody:\n- email (string, required)\n- firstName (string, required)\n- lastName (string, required)\n- password (string, required)"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let response = pm.response.json();",
+                  "if (response.data && response.data.token) { pm.collectionVariables.set(\"token\", response.data.token); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"aa@aa1.com\",\n  \"password\": \"789asdzxc\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Authenticates a user and returns an access token in `data.token`. The test script auto-saves this to the {{token}} collection variable for use by all authenticated requests.\n\nBody:\n- email (string, required)\n- password (string, required)"
+          },
+          "response": []
+        },
+        {
+          "name": "Forget Password",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"aa@aa1.com\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/forget-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "forget-password"]
+            },
+            "description": "Sends a numeric password reset code to the user's email.\n\nBody:\n- email (string, required)"
+          },
+          "response": []
+        },
+        {
+          "name": "Resend OTP",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"aa@aa1.com\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/resend-otp",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "resend-otp"]
+            },
+            "description": "Resends the OTP/reset code to the user's email if not received.\n\nBody:\n- email (string, required)"
+          },
+          "response": []
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"aa@aa1.com\",\n  \"resetCode\": 194711,\n  \"newPassword\": \"789asdzxc\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "reset-password"]
+            },
+            "description": "Resets the user's password using the reset code emailed by forget-password/resend-otp.\n\nBody:\n- email (string, required)\n- resetCode (number, required)\n- newPassword (string, required)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Dashboard Controller",
+      "description": "Manages diplomas (courses) and the quizzes that belong to them. Requires a Bearer token.",
+      "item": [
+        {
+          "name": "Create Diploma",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Node.js Basics\",\n  \"desc\": \"Introductory diploma for backend development\",\n  \"img\": \"https://example.com/image.png\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", ""]
+            },
+            "description": "Creates a new diploma (course).\n\nBody:\n- name (string, required)\n- desc (string, required)\n- img (string, URL, optional)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Diplomas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", ""]
+            },
+            "description": "Returns a list of all diplomas."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Diploma By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/:diplomaId",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", ":diplomaId"],
+              "variable": [
+                { "key": "diplomaId", "value": "{{diplomaId}}" }
+              ]
+            },
+            "description": "Returns a single diploma by its ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Diploma",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Node.js Advanced\",\n  \"desc\": \"Updated diploma description\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/:diplomaId",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", ":diplomaId"],
+              "variable": [
+                { "key": "diplomaId", "value": "{{diplomaId}}" }
+              ]
+            },
+            "description": "Updates one or more fields of a diploma.\n\nBody (all optional):\n- name (string)\n- desc (string)\n- img (string, URL)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Diploma",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/:diplomaId",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", ":diplomaId"],
+              "variable": [
+                { "key": "diplomaId", "value": "{{diplomaId}}" }
+              ]
+            },
+            "description": "Deletes a diploma by ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Diploma Quizzes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/:diplomaId/quizzes/",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", ":diplomaId", "quizzes", ""],
+              "variable": [
+                { "key": "diplomaId", "value": "{{diplomaId}}" }
+              ]
+            },
+            "description": "Returns all quizzes belonging to the given diploma."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Quiz (under Diploma)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Node.js Basics\",\n  \"desc\": \"Introductory diploma for backend development\",\n  \"img\": \"https://example.com/image.png\",\n  \"time\": 15,\n  \"quizType\": \"framwork\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/:diplomaId/quizzes/",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", ":diplomaId", "quizzes", ""],
+              "variable": [
+                { "key": "diplomaId", "value": "{{diplomaId}}" }
+              ]
+            },
+            "description": "Creates a new quiz under the given diploma.\n\nBody:\n- name (string, required)\n- desc (string, required)\n- img (string, URL, optional)\n- time (number, minutes, required)\n- quizType (string, required)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Quiz Controller",
+      "description": "Manages quizzes, quiz questions, and the quiz-taking (attempt) flow. Requires a Bearer token.",
+      "item": [
+        {
+          "name": "quiz",
+          "item": [
+            {
+              "name": "Get Quiz By ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/quizzes/:quizId",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["quizzes", ":quizId"],
+                  "variable": [
+                    { "key": "quizId", "value": "{{quizId}}" }
+                  ]
+                },
+                "description": "Returns a single quiz by ID."
+              },
+              "response": []
+            },
+            {
+              "name": "Get Quiz Questions",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/quizzes/:quizId/questions",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["quizzes", ":quizId", "questions"],
+                  "variable": [
+                    { "key": "quizId", "value": "{{quizId}}" }
+                  ]
+                },
+                "description": "Returns all questions belonging to the given quiz."
+              },
+              "response": []
+            },
+            {
+              "name": "Update Quiz",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Backend Quiz\",\n  \"desc\": \"Updated quiz description\",\n  \"time\": \"30\",\n  \"img\": \"https://example.com/quiz.png\",\n  \"quizType\": \"Advanced\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/quizzes/:quizId",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["quizzes", ":quizId"],
+                  "variable": [
+                    { "key": "quizId", "value": "{{quizId}}" }
+                  ]
+                },
+                "description": "Updates a quiz's details.\n\nBody (all optional):\n- name (string)\n- desc (string)\n- time (number/string, minutes)\n- img (string, URL)\n- quizType (string)"
+              },
+              "response": []
+            },
+            {
+              "name": "Delete Quiz",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/quizzes/:quizId",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["quizzes", ":quizId"],
+                  "variable": [
+                    { "key": "quizId", "value": "{{quizId}}" }
+                  ]
+                },
+                "description": "Deletes a quiz by ID."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "questions",
+          "item": [
+            {
+              "name": "Add Quiz Question",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"questionData\": {\n    \"multipleAnswer\": false,\n    \"head\": \"whats's 2+2?\"\n  },\n  \"answer_sheet\": [\n    { \"answer\": \"4\", \"correct\": true },\n    { \"answer\": \"10\", \"correct\": false }\n  ]\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/quizzes/:quizId/questions/",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["quizzes", ":quizId", "questions", ""],
+                  "variable": [
+                    { "key": "quizId", "value": "{{quizId}}" }
+                  ]
+                },
+                "description": "Adds a new question with its answer sheet to a quiz.\n\nBody:\n- questionData.multipleAnswer (boolean, required)\n- questionData.head (string, required) - the question text\n- answer_sheet (array, required) - each item: { answer: string, correct: boolean }"
+              },
+              "response": []
+            },
+            {
+              "name": "Get Question By ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/quizzes/:quizId/questions/:questionId",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["quizzes", ":quizId", "questions", ":questionId"],
+                  "variable": [
+                    { "key": "quizId", "value": "{{quizId}}" },
+                    { "key": "questionId", "value": "{{questionId}}" }
+                  ]
+                },
+                "description": "Returns a single question by ID."
+              },
+              "response": []
+            },
+            {
+              "name": "Update Question",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"question_body\": {\n    \"head\": \"whats 4+4?\"\n  },\n  \"answer_sheet\": [\n    { \"id\": \"6a6d45991a5291fdd2b5544b\", \"answer\": \"8\", \"correct\": true },\n    { \"id\": \"6a6d459a1a5291fdd2b5544c\", \"answer\": \"30\", \"correct\": false }\n  ]\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/quizzes/:quizId/questions/:questionId",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["quizzes", ":quizId", "questions", ":questionId"],
+                  "variable": [
+                    { "key": "quizId", "value": "{{quizId}}" },
+                    { "key": "questionId", "value": "{{questionId}}" }
+                  ]
+                },
+                "description": "Updates a question's body and/or its answer sheet entries.\n\nBody:\n- question_body.head (string, optional)\n- answer_sheet (array, optional) - each item: { id: string, answer: string, correct: boolean } - matched to existing answers by id"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Start Quiz",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quizData\": {\n    \"name\": \"Backend Quiz\",\n    \"desc\": \"Starting quiz\"\n  }\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/quizzes/:quizId/startQuiz",
+              "host": ["{{baseUrl}}"],
+              "path": ["quizzes", ":quizId", "startQuiz"],
+              "variable": [
+                { "key": "quizId", "value": "{{quizId}}" }
+              ]
+            },
+            "description": "Starts a new attempt for the given quiz. The response is expected to contain an attempt ID, used as the quizAttempt query parameter when submitting.\n\nBody:\n- quizData.name (string, required)\n- quizData.desc (string, optional)"
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Quiz",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/quizzes/:quizId/submitQuiz?quizAttempt={{quizAttempt}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["quizzes", ":quizId", "submitQuiz"],
+              "query": [
+                { "key": "quizAttempt", "value": "{{quizAttempt}}", "description": "ID of the attempt returned by Start Quiz" }
+              ],
+              "variable": [
+                { "key": "quizId", "value": "{{quizId}}" }
+              ]
+            },
+            "description": "Submits a previously started quiz attempt.\n\nQuery Params:\n- quizAttempt (string, required) - ID of the attempt returned by startQuiz"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
