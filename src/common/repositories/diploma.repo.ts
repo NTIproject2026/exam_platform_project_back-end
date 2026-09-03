@@ -1,5 +1,4 @@
 import baseRepo from "./base.repo.js";
-import { type IDiploma } from "../../database/categories/model.js";
 import type { Model } from "mongoose";
 import mongoose from "mongoose";
 

@@ -8,7 +8,7 @@ export function hashUserPassword(schema: Schema) {
 }
 
 export function paranoidFunction(schema: Schema) {
-  schema.pre(["find", "findOne"], function (this) {
+  schema.pre(["find", "findOne"], function (this) { 
     const query = this.getQuery();
     if (query?.paranoid) {
       this.setQuery({ ...query, deletedAt: { $exists: true } });

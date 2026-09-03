@@ -1,7 +1,7 @@
 import baseRepo from "./base.repo.js";
 import type { Model } from "mongoose";
 import mongoose from "mongoose";
-import type { IQuestion } from "../../database/questions/question.model.js";
+import { IQuestion } from "../../modules/quiz/questions/question.model.js";
 
 class questionRepo extends baseRepo<IQuestion> {
   constructor(

@@ -1,14 +1,14 @@
 import baseRepo from "./base.repo.js";
 import type { Model } from "mongoose";
 import mongoose from "mongoose";
-import type { IQuiz } from "../../database/quizzes/model.js";
+import { IQuiz } from "../../database/models/quiz.model.js";
 
-class quizrepo extends baseRepo<IQuiz> {
+class quizRepo extends baseRepo<IQuiz> {
   constructor(
-    protected readonly _model: Model<IQuiz> = mongoose.models.quizzes!!,
+    protected readonly _model: Model<IQuiz> = mongoose.models.quizzes!,
   ) {
     super(_model);
   }
 }
 
-export default new quizrepo();
+export default new quizRepo();
