@@ -1,10 +1,13 @@
-import { Router } from "express";
-import { completeLessonController, getProgressController } from "./progress.controller.js";
-import { authentication } from "../../common/middleware/authentication.js";
+import { Router } from 'express'
+import {
+  completeLessonController,
+  getProgressController,
+} from './progress.controller.js'
+import { authenticateUser } from '../../common/middlewares/authentication.js'
 
-const router = Router();
+const router = Router()
 
-router.post("/complete", authentication, completeLessonController);
-router.get("/:courseId", authentication, getProgressController);
+router.post('/complete', authenticateUser, completeLessonController)
+router.get('/:courseId', authenticateUser, getProgressController)
 
-export default router;
+export default router
