@@ -11,3 +11,11 @@ export function findAllCategories() {
 export function findCategoryById(id: string) {
   return CategoryModel.findById(id);
 }
+
+export function updateCategory(id: string, name?: string) {
+  return CategoryModel.findByIdAndUpdate(id, { name }, { new: true });
+}
+
+export function deleteCategory(id: string) {
+  return CategoryModel.findByIdAndDelete(id);
+}
